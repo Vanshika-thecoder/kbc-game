@@ -1,0 +1,142 @@
+//input
+#include <iostream>
+#include <vector>
+#include <ctime>
+#include <cstdlib>
+#include <algorithm>
+
+using namespace std;
+
+class Question {
+public:
+    string text;
+    vector<string> options;
+    char correct;
+
+    Question(string q, vector<string> opts, char ans) {
+        text = q;
+        options = opts;
+        correct = toupper(ans);
+    }
+
+    void displayOptions(const vector<int>& indices) {
+        for (int i : indices) {
+            cout << (char)('A' + i) << ". " << options[i] << endl;
+        }
+    }
+
+    void showQuestion(bool useLifeline) {
+        cout << "\nQ: " << text << endl;
+
+        if (!useLifeline) {
+            for (int i = 0; i < 4; ++i)
+                cout << (char)('A' + i) << ". " << options[i] << endl;
+        } else {
+            // Show correct answer + 1 random wrong option
+            vector<int> wrongIndices;
+            int correctIndex = correct - 'A';
+
+            for (int i = 0; i < 4; ++i)
+                if (i != correctIndex) wrongIndices.push_back(i);
+
+            srand(time(0));
+            int randomWrong = wrongIndices[rand() % 3];
+
+            vector<int> toShow = { correctIndex, randomWrong };
+            sort(toShow.begin(), toShow.end());
+
+            displayOptions(toShow);
+        }
+    }
+
+    bool checkAnswer(char ans) {
+        return toupper(ans) == correct;
+    }
+};
+
+int main() {
+    vector<Question> questions = {
+        Question("Which country is known as the 'Land of the Rising Sun'?", {"China", "South Korea", "Japan", "Thailand"}, 'C'),
+        Question("Who was the first President of independent India?", {"Nehru", "Ambedkar", "Rajendra Prasad", "Bose"}, 'C'),
+        Question("What is the value of Pi approximately?", {"2.14", "3.14", "3.41", "4.13"}, 'B'),
+        Question("Which gas is absorbed by plants during photosynthesis?", {"Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"}, 'C'),
+        Question("What is the largest mammal in the world?", {"Elephant", "Blue Whale", "Giraffe", "Polar Bear"}, 'B')
+    };
+
+    int score = 0;
+    bool lifelineUsed = false;
+
+    cout << "🎉 Welcome to Kaun Banega Crorepati 🎉\n";
+
+    for (int i = 0; i < questions.size(); ++i) {
+        cout << "\n--- Question " << i + 1 << " ---\n";
+
+        // Step 1: Show full question
+        questions[i].showQuestion(false);
+
+        // Step 2: Ask for lifeline
+        char useLifeline = 'n';
+        if (!lifelineUsed) {
+            cout << "Do you want to use 50:50 lifeline? (y/n): ";
+            cin >> useLifeline;
+        }
+
+        // Step 3: Re-show question if lifeline is used
+        bool lifeline = (!lifelineUsed && (useLifeline == 'y' || useLifeline == 'Y'));
+        if (lifeline) {
+            lifelineUsed = true;
+            cout << "\nAfter 50:50 lifeline:\n";
+            questions[i].showQuestion(true);
+        }
+
+        // Step 4: Answer input
+        char answer;
+        cout << "Enter your answer (A/B/C/D): ";
+        cin >> answer;
+
+        if (questions[i].checkAnswer(answer)) {
+            cout << "✅ Correct!\n";
+            score += 1000;
+            cout << "You have won ₹1000.\n";
+        } else {
+            cout << "❌ Wrong! The correct answer was " << questions[i].correct << ".\n";
+            break;
+        }
+    }
+
+    cout << "\n💰 Game Over! Your total winnings: ₹" << score << endl;
+    return 0;
+}
+
+//output
+🎉 Welcome to Kaun Banega Crorepati 🎉
+
+--- Question 1 ---
+Q: Which country is known as the 'Land of the Rising Sun'?
+A. China
+B. South Korea
+C. Japan
+D. Thailand
+Do you want to use 50:50 lifeline? (y/n): n
+Enter your answer (A/B/C/D): C
+✅ Correct!
+You have won ₹1000. 
+
+--- Question 2 ---
+Q: Who was the first President of independent India?
+A. Nehru
+B. Ambedkar
+C. Rajendra Prasad
+D. Bose
+Do you want to use 50:50 lifeline? (y/n): y
+
+After 50:50 lifeline:
+C. Rajendra Prasad
+D. Bose
+Enter your answer (A/B/C/D): C
+✅ Correct!
+You have won ₹1000. 
+
+...
+
+💰 Game Over! Your total winnings: ₹20000
